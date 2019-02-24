@@ -118,7 +118,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# /notebooks
-
-# ignore all csv files in notebooks
-# /notebooks/*.csv
+/data/**/*.csv

@@ -1,9 +1,10 @@
 INPUT_PATH = 'data/input'
 PARTIDO_MUNZONA = 'votacao-partido-zona'
+CANDIDATO_MUNZONA = 'votacao-zona'
 
 OUTPUT_PATH = 'data/output'
-CANDIDATES_CSV = 'votos_consolidados_por_deputado'
-FORMAT_FILE = '.csv'
+PARTIDO_CSV = 'votos_consolidados_por_partido'
+CANDIDATO_CSV = 'votos_consolidados_por_deputado'
 
 FORMAT_FILE = '.csv'
 

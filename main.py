@@ -2,7 +2,7 @@ import logging
 import os
 import pandas as pd
 from constants import FORMAT_FILE, OUTPUT_PATH, PARTIDO_CSV, CANDIDATO_CSV
-from parser import generate_party_data
+from parser import generate_party_data, generate_candidate_data
 from helpers import save_data
 
 """
@@ -38,12 +38,12 @@ def main():
     
     # TODO: verificar também se o arquivo de input consta em data/input
     candidate_filepath = f'{OUTPUT_PATH}/{CANDIDATO_CSV}{FORMAT_FILE}'
-    logging.info('Checando se o arquivo de dados consolidados por candidate existe')
+    logging.info('Checando se o arquivo de dados consolidados por candidato existe')
     if os.path.exists(candidate_filepath):
         logging.info('Arquivo existe')
     else:
         logging.info('Arquivo não existe')
-        data = pd.DataFrame(generate_party_data())
+        data = pd.DataFrame(generate_candidate_data())
         logging.info('Salvando dados')
         save_data(df=data, filepath=candidate_filepath)
 

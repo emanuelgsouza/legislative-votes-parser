@@ -1,6 +1,6 @@
 import pandas as pd
 import logging
-from constants import INPUT_PATH, PARTIDO_MUNZONA, FORMAT_FILE, STATES
+from constants import INPUT_PATH, PARTIDO_MUNZONA, FORMAT_FILE, STATES, CANDIDATO_MUNZONA
 from helpers import flat_lists
 
 
@@ -106,7 +106,7 @@ def generate_party_data():
     return flat_lists(lists=processed)
 
 def generate_candidate_data():
-    df = pd.read_csv(f'{INPUT_PATH}/{PARTIDO_MUNZONA}{FORMAT_FILE}')
+    df = pd.read_csv(f'{INPUT_PATH}/{CANDIDATO_MUNZONA}{FORMAT_FILE}')
 
     candidates_grouped_by_vote = df[['nome_urna', 'total_votos']].groupby(by='nome_urna').sum()
 

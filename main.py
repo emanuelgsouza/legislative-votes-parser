@@ -1,7 +1,7 @@
 import logging
 import os
 import pandas as pd
-from constants import FORMAT_FILE, OUTPUT_PATH, PARTIDO_CSV, CANDIDATO_CSV
+import constants
 from parser import generate_party_data, generate_candidate_data
 from helpers import save_data
 
@@ -24,28 +24,26 @@ logging.basicConfig(
 
 def main():
     logging.info('Iniciando procedimento')
-    partido_filepath = f'{OUTPUT_PATH}/{PARTIDO_CSV}{FORMAT_FILE}'
     logging.info('Checando se o arquivo de dados consolidados por partido existe')
 
     # TODO: verificar também se o arquivo de input consta em data/input
-    if os.path.exists(partido_filepath):
+    if os.path.exists(constants.PARTIDO_FILE_PATH):
         logging.info('Arquivo existe')
     else:
         logging.info('Arquivo não existe')
         data = pd.DataFrame(generate_party_data())
         logging.info('Salvando dados')
-        save_data(df=data, filepath=partido_filepath)
+        save_data(df=data, filepath=constants.PARTIDO_FILE_PATH)
     
     # TODO: verificar também se o arquivo de input consta em data/input
-    candidate_filepath = f'{OUTPUT_PATH}/{CANDIDATO_CSV}{FORMAT_FILE}'
     logging.info('Checando se o arquivo de dados consolidados por candidato existe')
-    if os.path.exists(candidate_filepath):
+    if os.path.exists(constants.CANDIDATO_FILE_PATH):
         logging.info('Arquivo existe')
     else:
         logging.info('Arquivo não existe')
         data = pd.DataFrame(generate_candidate_data())
         logging.info('Salvando dados')
-        save_data(df=data, filepath=candidate_filepath)
+        save_data(df=data, filepath=constants.CANDIDATO_FILE_PATH)
 
 if __name__ == '__main__':
     main()

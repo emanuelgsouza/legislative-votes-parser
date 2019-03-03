@@ -5,6 +5,7 @@ from helpers import flat_lists
 
 
 def factory_partido(
+    ano_eleicao,
     descricao_ue,
     sigla_uf,
     nome_partido,
@@ -17,6 +18,7 @@ def factory_partido(
     total_legenda
 ):
     return {
+        'ano_eleicao': ano_eleicao,
         'descricao_ue': descricao_ue,
         'sigla_uf': sigla_uf,
         'nome_partido': nome_partido,
@@ -31,6 +33,7 @@ def factory_partido(
 
 
 def factory_deputado(
+    ano_eleicao,
     nome,
     nome_urna,
     numero_urna,
@@ -48,6 +51,7 @@ def factory_deputado(
     descricao_situacao_candidatura
 ):
     return {
+        'ano_eleicao': ano_eleicao,
         'nome': nome,
         'nome_urna': nome_urna,
         'numero_urna': numero_urna,
@@ -89,6 +93,7 @@ def generate_party_data():
                 continue
 
             items[row.nome_partido] = factory_partido(
+                ano_eleicao=row.ano_eleicao,
                 nome_partido=row.nome_partido,
                 numero_partido=row.numero_partido,
                 sigla_partido=row.sigla_partido,
@@ -127,6 +132,7 @@ def generate_candidate_data():
                 continue
 
             items[row.nome_urna] = factory_deputado(
+                ano_eleicao=row.ano_eleicao,
                 nome=row.nome,
                 nome_urna=row.nome_urna,
                 numero_urna=row.numero_urna,

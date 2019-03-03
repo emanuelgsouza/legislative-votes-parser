@@ -81,7 +81,7 @@ def generate_party_data(sigla: str, df_c: DataFrame, df_p: DataFrame, coligation
         'coligacao_uuid': str(coligation_uuid),
         'nome': normalize_nome(nome=item['nome_partido']),
         'ano_eleicao': int(item['ano_eleicao']),
-        'sigla_uf': int(item['sigla_uf']),
+        'sigla_uf': item['sigla_uf'],
         'sigla': item['sigla_partido'],
         'numero': int(item['numero_partido']),
         'votos_nominais': int(sum(candidates['total_votos'])),
@@ -121,7 +121,7 @@ def generate_coligation_data(coligation: str, df_c: DataFrame, df_p: DataFrame, 
     }
 
 
-def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: int, res_json: list):
+def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: int, year_uuid: str):
     logging.info(f'Analizando o estado {state}')
 
     candidates_by_state = df_c[df_c['sigla_uf'] == state]
@@ -136,8 +136,9 @@ def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: i
 
     state_uuid = uuid.uuid4()
 
-    res_json.append({
+    return {
         'uuid': str(state_uuid),
+        'ano_uuid': str(year_uuid),
         'nome': normalize_nome(nome=candidates_by_state['descricao_ue'].iloc[0]),
         'sigla': state,
         'ano_eleicao': int(ano),
@@ -153,8 +154,26 @@ def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: i
             )
             for col in helpers.get_legend_composition(parties_by_state)
         ]
-    })
+    }
 
+
+def generate_ano_data(ano: int, df_c: DataFrame, df_p: DataFrame, res_json: list):
+    year_uuid = uuid.uuid4()
+
+    res_json.append({
+        'ano': ano,
+        'uuid': str(year_uuid),
+        'estados': [
+            generate_date_for_state(
+                state=state,
+                df_c=df_c[df_c['ano_eleicao'] == ano],
+                df_p=df_p[df_p['ano_eleicao'] == ano],
+                ano=ano,
+                year_uuid=year_uuid
+            )
+            for state in helpers.get_states(df=df_c)
+        ]
+    })
 
 def main():
     logging.info('Iniciando procedimento de geração dos dados para o banco')
@@ -177,10 +196,14 @@ def main():
         df_c = pd.read_csv(constants.CANDIDATO_FILE_PATH)
     
     logging.info('Dados carregados')
-    states = helpers.get_states(df=df_c)
 
-    for state in states:
-        generate_date_for_state(state=state, df_c=df_c, df_p=df_p, ano=2018, res_json=res_json)
+    for ano in [2018]:
+        generate_ano_data(
+            ano=ano,
+            df_c=df_c,
+            df_p=df_p,
+            res_json=res_json
+        )
     
     with open(constants.JSON_OUTPUT_PATH, 'w') as fp:
         json.dump(res_json, fp, indent=2)

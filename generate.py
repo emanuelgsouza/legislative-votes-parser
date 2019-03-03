@@ -6,6 +6,7 @@ import constants
 import helpers
 import json
 import uuid
+from functools import reduce
 
 
 logging.basicConfig(
@@ -25,12 +26,36 @@ def get_party_item(sigla, df_c, df_p):
     return {}
 
 
+def use_in_reduce(acc: str, part: str):
+    # primeira iteracao
+    if len(acc) == 0:
+        return acc + part.capitalize()
+    
+    # evitar que nomes com DA e DE, fique Da e De
+    if part.upper() in ['DE', 'DA']:
+        return acc + ' ' + part.lower()
+
+    # iteracoes subsequentes
+    return acc + ' ' + part.capitalize()
+
+
+def normalize_nome(nome: str):
+    if len(nome.split(' ')) == 1:
+        return nome.capitalize()
+    
+    return reduce(
+        use_in_reduce,
+        nome.split(' '),
+        ''
+    )
+
+
 def generate_candidate_data(candidate: Series, party_uuid: str, coeciente_eleitoral: int):
     return {
         'uuid': str(str(uuid.uuid4())),
         'party_uuid': str(party_uuid),
-        'nome': candidate['nome'],
-        'nome_urna': candidate['nome_urna'],
+        'nome': normalize_nome(nome=candidate['nome']),
+        'nome_urna': normalize_nome(nome=candidate['nome_urna']),
         'numero': int(candidate['numero_urna']),
         'votos': int(candidate['total_votos']),
         'puxado': int(candidate['total_votos']) <= coeciente_eleitoral,
@@ -49,7 +74,7 @@ def generate_party_data(sigla: str, df_c: DataFrame, df_p: DataFrame, coligation
     return {
         'uuid': str(party_uuid),
         'coligacao_uuid': str(coligation_uuid),
-        'nome': item['nome_partido'],
+        'nome': normalize_nome(nome=item['nome_partido']),
         'sigla': item['sigla_partido'],
         'numero': int(item['numero_partido']),
         'votos_nominais': int(sum(candidates['total_votos'])),
@@ -72,7 +97,7 @@ def generate_coligation_data(coligation: str, df_c: DataFrame, df_p: DataFrame, 
     return {
         'uuid': str(coligation_uuid),
         'state_uuid': str(state_uuid),
-        'nome': item['nome_legenda'],
+        'nome': normalize_nome(nome=item['nome_legenda']),
         'composicao': coligation,
         'partidos': [
             generate_party_data(
@@ -104,7 +129,7 @@ def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, res_js
 
     res_json.append({
         'uuid': str(state_uuid),
-        'nome': candidates_by_state['descricao_ue'].iloc[0],
+        'nome': normalize_nome(nome=candidates_by_state['descricao_ue'].iloc[0]),
         'sigla': state,
         'votos_nominais': votos_nominais,
         'cadeiras': cadeiras,

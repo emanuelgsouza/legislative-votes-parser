@@ -58,6 +58,11 @@ def generate_candidate_data(candidate: Series, party_uuid: str, coeciente_eleito
         'nome_urna': normalize_nome(nome=candidate['nome_urna']),
         'numero': int(candidate['numero_urna']),
         'votos': int(candidate['total_votos']),
+        'sigla_partido': candidate['sigla_partido'],
+        'sigla_uf': candidate['sigla_uf'],
+        'composicao_legenda': candidate['composicao_legenda'],
+        'nome_legenda': candidate['nome_legenda'],
+        'ano_eleicao': int(candidate['ano_eleicao']),
         'puxado': int(candidate['total_votos']) <= coeciente_eleitoral,
         'state': candidate['descricao_totalizacao_turno']
     }
@@ -75,6 +80,8 @@ def generate_party_data(sigla: str, df_c: DataFrame, df_p: DataFrame, coligation
         'uuid': str(party_uuid),
         'coligacao_uuid': str(coligation_uuid),
         'nome': normalize_nome(nome=item['nome_partido']),
+        'ano_eleicao': int(item['ano_eleicao']),
+        'sigla_uf': int(item['sigla_uf']),
         'sigla': item['sigla_partido'],
         'numero': int(item['numero_partido']),
         'votos_nominais': int(sum(candidates['total_votos'])),
@@ -97,6 +104,8 @@ def generate_coligation_data(coligation: str, df_c: DataFrame, df_p: DataFrame, 
     return {
         'uuid': str(coligation_uuid),
         'state_uuid': str(state_uuid),
+        'sigla_uf': item['sigla_uf'],
+        'ano_eleicao': int(item['ano_eleicao']),
         'nome': normalize_nome(nome=item['nome_legenda']),
         'composicao': coligation,
         'partidos': [
@@ -112,7 +121,7 @@ def generate_coligation_data(coligation: str, df_c: DataFrame, df_p: DataFrame, 
     }
 
 
-def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, res_json: list):
+def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: int, res_json: list):
     logging.info(f'Analizando o estado {state}')
 
     candidates_by_state = df_c[df_c['sigla_uf'] == state]
@@ -131,6 +140,7 @@ def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, res_js
         'uuid': str(state_uuid),
         'nome': normalize_nome(nome=candidates_by_state['descricao_ue'].iloc[0]),
         'sigla': state,
+        'ano_eleicao': int(ano),
         'votos_nominais': votos_nominais,
         'cadeiras': cadeiras,
         'coligacoes': [
@@ -170,7 +180,7 @@ def main():
     states = helpers.get_states(df=df_c)
 
     for state in states:
-        generate_date_for_state(state=state, df_c=df_c, df_p=df_p, res_json=res_json)
+        generate_date_for_state(state=state, df_c=df_c, df_p=df_p, ano=2018, res_json=res_json)
     
     with open(constants.JSON_OUTPUT_PATH, 'w') as fp:
         json.dump(res_json, fp, indent=2)

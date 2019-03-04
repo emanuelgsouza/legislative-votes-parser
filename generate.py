@@ -54,17 +54,17 @@ def generate_candidate_data(candidate: Series, party_uuid: str, coeciente_eleito
     return {
         'uuid': str(str(uuid.uuid4())),
         'party_uuid': str(party_uuid),
-        'nome': normalize_nome(nome=candidate['nome']),
-        'nome_urna': normalize_nome(nome=candidate['nome_urna']),
-        'numero': int(candidate['numero_urna']),
-        'votos': int(candidate['total_votos']),
-        'sigla_partido': candidate['sigla_partido'],
-        'sigla_uf': candidate['sigla_uf'],
-        'composicao_legenda': candidate['composicao_legenda'],
-        'nome_legenda': candidate['nome_legenda'],
-        'ano_eleicao': int(candidate['ano_eleicao']),
-        'puxado': int(candidate['total_votos']) <= coeciente_eleitoral,
-        'state': candidate['descricao_totalizacao_turno']
+        'name': normalize_nome(nome=candidate['nome']),
+        'urne_name': normalize_nome(nome=candidate['nome_urna']),
+        'number': int(candidate['numero_urna']),
+        'votes': int(candidate['total_votos']),
+        'party': candidate['sigla_partido'],
+        'state_sigla': candidate['sigla_uf'],
+        'party_composition': candidate['composicao_legenda'],
+        'party_composition_name': candidate['nome_legenda'],
+        'year': int(candidate['ano_eleicao']),
+        'is_pulling': int(candidate['total_votos']) <= coeciente_eleitoral,
+        'status': candidate['descricao_totalizacao_turno']
     }
 
 
@@ -78,14 +78,14 @@ def generate_party_data(sigla: str, df_c: DataFrame, df_p: DataFrame, coligation
 
     return {
         'uuid': str(party_uuid),
-        'coligacao_uuid': str(coligation_uuid),
-        'nome': normalize_nome(nome=item['nome_partido']),
-        'ano_eleicao': int(item['ano_eleicao']),
-        'sigla_uf': item['sigla_uf'],
-        'sigla': item['sigla_partido'],
-        'numero': int(item['numero_partido']),
-        'votos_nominais': int(sum(candidates['total_votos'])),
-        'votos_legenda': total_legenda,
+        'coligation_uuid': str(coligation_uuid),
+        'name': normalize_nome(nome=item['nome_partido']),
+        'year': int(item['ano_eleicao']),
+        'state_sigla': item['sigla_uf'],
+        'initials': item['sigla_partido'],
+        'number': int(item['numero_partido']),
+        'votes': int(sum(candidates['total_votos'])),
+        'legend_votes': total_legenda,
         'candidatos': [
             generate_candidate_data(candidate=candidate, party_uuid=party_uuid, coeciente_eleitoral=coeciente_eleitoral)
             for (_, candidate) in candidates.iterrows()
@@ -104,10 +104,10 @@ def generate_coligation_data(coligation: str, df_c: DataFrame, df_p: DataFrame, 
     return {
         'uuid': str(coligation_uuid),
         'state_uuid': str(state_uuid),
-        'sigla_uf': item['sigla_uf'],
-        'ano_eleicao': int(item['ano_eleicao']),
-        'nome': normalize_nome(nome=item['nome_legenda']),
-        'composicao': coligation,
+        'state_sigla': item['sigla_uf'],
+        'year': int(item['ano_eleicao']),
+        'name': normalize_nome(nome=item['nome_legenda']),
+        'composition': coligation,
         'partidos': [
             generate_party_data(
                 sigla=sigla,
@@ -138,12 +138,12 @@ def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: i
 
     return {
         'uuid': str(state_uuid),
-        'ano_uuid': str(year_uuid),
-        'nome': normalize_nome(nome=candidates_by_state['descricao_ue'].iloc[0]),
+        'election_uuid': str(year_uuid),
+        'name': normalize_nome(nome=candidates_by_state['descricao_ue'].iloc[0]),
         'sigla': state,
-        'ano_eleicao': int(ano),
-        'votos_nominais': votos_nominais,
-        'cadeiras': cadeiras,
+        'year': int(ano),
+        'votes': votos_nominais,
+        'chars': cadeiras,
         'coligacoes': [
             generate_coligation_data(
                 coligation=col,
@@ -161,7 +161,7 @@ def generate_ano_data(ano: int, df_c: DataFrame, df_p: DataFrame, res_json: list
     year_uuid = uuid.uuid4()
 
     res_json.append({
-        'ano': ano,
+        'year': ano,
         'uuid': str(year_uuid),
         'estados': [
             generate_date_for_state(

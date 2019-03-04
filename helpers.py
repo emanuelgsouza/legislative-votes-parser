@@ -20,3 +20,7 @@ def get_legend_composition(df):
 
 def get_parties_by_coligation(coligation):
     return coligation.split(' / ')
+
+
+def omit(obj, _key):
+    return { key:val for key, val in obj.items() if key != _key }

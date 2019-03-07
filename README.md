@@ -17,3 +17,7 @@ Antes de mais nada, é necessário um arquivo gerado pelo repositório do turica
 O arquivo de interesse, é o gerado pela linha de comando `python tse.py votacao-zona --years=2018`. Com o dataset gerado, copie-o para a pasta `data/input`
 
 Um outro arquivo necessário a esse projeto, foi gerado pelo notebook que se encontra em `notebooks/deputados-eleitos.ipynb`. Tal CSV será gerado por scrapping da [página da Câmara Legislativa Nacional](https://www.camara.leg.br/internet/agencia/infograficos-html5/DeputadosEleitos/index.html).
+
+## A API
+
+O JSON de dados gerado pelo script `parser-to-json.py` é lido na API no repositório [legislative-votes-api](https://github.com/emanuelgsouza/legislative-votes-api). Em breve teremos uma aplicação web :)

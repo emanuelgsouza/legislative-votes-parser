@@ -71,7 +71,7 @@ Tendo as dependencias já instaladas e os CSVs acima gerados e constando na past
 
 ```sh
 # não esqueça do ambiente virtual
-python main.py
+python consolidate.py
 ```
 
 **Atenção**: em minha máquina, com 12GB de RAM e um Intell i5, o script acima consumiu toda a memória para fazer a extração, pois o Pandas, por padrão, traz todos os dados para a memória e um dos CSVs do TSE possui cerca de 2.8 GB de tamanho. Atenção a execução desse script.

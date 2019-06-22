@@ -120,6 +120,13 @@ python generate-entities.py
 
 Ele terá como output a criação de uma pasta em `data/output/entities`, com os JSONs para as respectivas entidades.
 
+Por fim, ainda é possível salvar os dados de `data.json` para um banco de dados Postgres. Para tanto, certifique-se que os dados de conexão no arquivo parser-data-to-sql.py estão corretas e as tabelas também estão criadas. Com o banco de dados de pé, execute o comando abaixo:
+
+```sh
+# não esqueça do ambiente virtual
+python parser-data-to-sql.py
+```
+
 ## Licença
 
 Este código está licenciado sobre a licença [MIT](./LICENSE).

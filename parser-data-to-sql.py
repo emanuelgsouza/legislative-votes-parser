@@ -57,8 +57,8 @@ def get_election_data(election):
 
 def get_states_data(election):
     return reduce(
-        lambda acc, state: acc + [ omit(obj=state, _key='coligacoes') ],
-        election['estados'],
+        lambda acc, state: acc + [ omit(obj=state, _key='coligations') ],
+        election['states'],
         []
     )
 
@@ -66,10 +66,10 @@ def get_states_data(election):
 def get_coligacoes_data(election):
     coligacoes = []
 
-    for state in election['estados']:
+    for state in election['states']:
         coligacoes.append(reduce(
-            lambda acc, coligaction: acc + [ omit(obj=coligaction, _key='partidos') ],
-            state['coligacoes'],
+            lambda acc, coligaction: acc + [ omit(obj=coligaction, _key='parties') ],
+            state['coligations'],
             []
         ))
     
@@ -79,11 +79,11 @@ def get_coligacoes_data(election):
 def get_parties_data(election):
     parties = []
 
-    for state in election['estados']:
-        for coligacao in state['coligacoes']:
+    for state in election['states']:
+        for coligacao in state['coligations']:
             parties.append(reduce(
-                lambda acc, party: acc + [ omit(obj=party, _key='candidatos') ],
-                coligacao['partidos'],
+                lambda acc, party: acc + [ omit(obj=party, _key='candidates') ],
+                coligacao['parties'],
                 []
             ))
     
@@ -93,10 +93,10 @@ def get_parties_data(election):
 def get_candidates_data(election):
     candidates = []
 
-    for state in election['estados']:
-        for coligacao in state['coligacoes']:
-            for party in coligacao['partidos']:
-                candidates.append(party['candidatos'])
+    for state in election['states']:
+        for coligacao in state['coligations']:
+            for party in coligacao['parties']:
+                candidates.append(party['candidates'])
     
     return candidates
 

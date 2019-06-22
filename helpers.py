@@ -24,3 +24,9 @@ def get_parties_by_coligation(coligation):
 
 def omit(obj, _key):
     return { key:val for key, val in obj.items() if key != _key }
+
+
+def get_sum_prop(data: list, prop: str):
+    return sum(
+        map(lambda x: x.get(prop, 0), data)
+    )

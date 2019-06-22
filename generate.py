@@ -1,5 +1,6 @@
 import pandas as pd
 from pandas import DataFrame, Series
+import pydash
 import logging
 import os
 import constants
@@ -8,6 +9,9 @@ import json
 import uuid
 from functools import reduce
 
+"""
+Arquivo para transformar os dados dos CSVs para um único arquivo JSON, chamado data.json
+"""
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,10 +54,22 @@ def normalize_nome(nome: str):
     )
 
 
-def generate_candidate_data(candidate: Series, party_uuid: str, coeciente_eleitoral: int):
+def factory_candidate(
+    candidate: Series,
+    party_uuid: str,
+    coeciente_eleitoral: int,
+    coligation_uuid=str,
+    state_uuid=str,
+    year_uuid=str
+):
+    status = candidate['descricao_totalizacao_turno']
+
     return {
         'uuid': str(str(uuid.uuid4())),
         'party_uuid': str(party_uuid),
+        'coligation_uuid': str(coligation_uuid),
+        'state_uuid': str(state_uuid),
+        'year_uuid': str(year_uuid),
         'name': normalize_nome(nome=candidate['nome']),
         'urne_name': normalize_nome(nome=candidate['nome_urna']),
         'number': int(candidate['numero_urna']),
@@ -61,40 +77,129 @@ def generate_candidate_data(candidate: Series, party_uuid: str, coeciente_eleito
         'sigla_party': candidate['sigla_partido'],
         'state_sigla': candidate['sigla_uf'],
         'year': int(candidate['ano_eleicao']),
-        'is_pulling': int(candidate['total_votos']) <= coeciente_eleitoral,
-        'status': candidate['descricao_totalizacao_turno']
+        'is_pulling': status == 'ELEITO POR QP',
+        'status': status
     }
 
 
-def generate_party_data(sigla: str, df_c: DataFrame, df_p: DataFrame, coligation_uuid: str, coeciente_eleitoral: int):
+def generate_candidate_data(
+    df_c: DataFrame,
+    party_uuid: str,
+    coeciente_eleitoral: int,
+    sigla: str,
+    coligation_uuid=str,
+    state_uuid=str,
+    year_uuid=str
+):
+    candidates = df_c[df_c['sigla_partido'] == sigla]
+
+    return DataFrame([
+        factory_candidate(
+            candidate=candidate,
+            party_uuid=party_uuid,
+            coeciente_eleitoral=coeciente_eleitoral,
+            coligation_uuid=coligation_uuid,
+            state_uuid=state_uuid,
+            year_uuid=year_uuid
+        ) for (_, candidate) in candidates.iterrows()
+    ])
+
+
+def factory_party(
+    sigla: str,
+    df_c: DataFrame,
+    df_p: DataFrame,
+    coligation_uuid: str,
+    coeciente_eleitoral: int,
+    state_uuid=str,
+    year_uuid=str
+):
     logging.debug(f'Analisando o partido {sigla}')
     item = get_party_item(sigla=sigla, df_c=df_c, df_p=df_p)
-    candidates = df_c[df_c['sigla_partido'] == sigla]
     legend_key = 'total_legenda'
     total_legenda = int(item[legend_key]) if legend_key in item.keys() else 0
     party_uuid = uuid.uuid4()
+    candidates = generate_candidate_data(
+        df_c=df_c,
+        party_uuid=party_uuid,
+        coeciente_eleitoral=coeciente_eleitoral,
+        sigla=item['sigla_partido'],
+        coligation_uuid=coligation_uuid,
+        state_uuid=state_uuid,
+        year_uuid=year_uuid
+    )
+
+    if len(candidates) == 0:
+        return {
+            'uuid': str(party_uuid),
+            'state_uuid': str(state_uuid),
+            'year_uuid': str(year_uuid),
+            'coligation_uuid': str(coligation_uuid),
+            'name': normalize_nome(nome=item['nome_partido']),
+            'year': int(item['ano_eleicao']),
+            'state_sigla': item['sigla_uf'],
+            'initials': item['sigla_partido'],
+            'number': int(item['numero_partido']),
+            'votes': 0,
+            'elect_qty': 0,
+            'suplent_qty': 0,
+            'pulling_qty': 0,
+            'candidates': 0,
+            'legend_votes': total_legenda,
+            'candidates': []
+        }
 
     return {
         'uuid': str(party_uuid),
+        'state_uuid': str(state_uuid),
+        'year_uuid': str(year_uuid),
         'coligation_uuid': str(coligation_uuid),
         'name': normalize_nome(nome=item['nome_partido']),
         'year': int(item['ano_eleicao']),
         'state_sigla': item['sigla_uf'],
         'initials': item['sigla_partido'],
         'number': int(item['numero_partido']),
-        'votes': int(sum(candidates['total_votos'])),
-        'elect_qty': len(candidates[candidates['descricao_totalizacao_turno'].isin(constants.ELECT_CONDITIONS)]),
-        'suplent_qty': len(candidates[candidates['descricao_totalizacao_turno'].isin(constants.SUPLENT_CONDITIONS)]),
+        'votes': int(sum(candidates['votes'])),
+        'elect_qty': len(candidates[candidates['status'].isin(constants.ELECT_CONDITIONS)]),
+        'suplent_qty': len(candidates[candidates['status'].isin(constants.SUPLENT_CONDITIONS)]),
+        'pulling_qty': len(candidates[candidates['is_pulling']]),
         'candidates': len(candidates),
         'legend_votes': total_legenda,
-        'candidatos': [
-            generate_candidate_data(candidate=candidate, party_uuid=party_uuid, coeciente_eleitoral=coeciente_eleitoral)
-            for (_, candidate) in candidates.iterrows()
-        ]
+        'candidates': list(candidates.to_dict(orient='index').values())
     }
 
 
-def generate_coligation_data(coligation: str, df_c: DataFrame, df_p: DataFrame, state_uuid: str, coeciente_eleitoral: int):
+def generate_party_data(
+    siglas: list,
+    df_c=DataFrame,
+    df_p=DataFrame,
+    coligation_uuid=str,
+    coeciente_eleitoral=int,
+    state_uuid=str,
+    year_uuid=str
+):
+    return [
+        factory_party(
+            sigla=sigla,
+            df_c=df_c,
+            df_p=df_p,
+            coligation_uuid=coligation_uuid,
+            coeciente_eleitoral=coeciente_eleitoral,
+            state_uuid=state_uuid,
+            year_uuid=year_uuid
+        )
+        for sigla in siglas
+    ]
+
+
+def factory_coligation(
+    coligation=str,
+    df_p=DataFrame,
+    df_c=DataFrame,
+    state_uuid=str,
+    coeciente_eleitoral=int,
+    year_uuid=str
+):
     item = df_p[df_p['composicao_legenda'] == coligation].iloc[0]
     siglas = helpers.get_parties_by_coligation(coligation)
 
@@ -102,8 +207,19 @@ def generate_coligation_data(coligation: str, df_c: DataFrame, df_p: DataFrame, 
     logging.debug(f'Foram encontrados {len(siglas)} partidos')
     coligation_uuid = uuid.uuid4()
 
+    parties = generate_party_data(
+        siglas=siglas,
+        df_c=df_c,
+        df_p=df_p,
+        coligation_uuid=coligation_uuid,
+        coeciente_eleitoral=coeciente_eleitoral,
+        state_uuid=state_uuid,
+        year_uuid=year_uuid
+    )
+
     return {
         'uuid': str(coligation_uuid),
+        'year_uuid': str(year_uuid),
         'state_uuid': str(state_uuid),
         'state_sigla': item['sigla_uf'],
         'year': int(item['ano_eleicao']),
@@ -113,18 +229,31 @@ def generate_coligation_data(coligation: str, df_c: DataFrame, df_p: DataFrame, 
         'elect_qty': len(df_c[df_c['descricao_totalizacao_turno'].isin(constants.ELECT_CONDITIONS)]),
         'suplent_qty': len(df_c[df_c['descricao_totalizacao_turno'].isin(constants.SUPLENT_CONDITIONS)]),
         'candidates': len(df_c),
-        'partidos': [
-            generate_party_data(
-                sigla=sigla,
-                df_c=df_c,
-                df_p=df_p,
-                coligation_uuid=coligation_uuid,
-                coeciente_eleitoral=coeciente_eleitoral
-            )
-            for sigla in siglas
-        ]
+        'pulling_qty': sum(
+            map(lambda x: int(x.get('pulling_qty', 0)), parties)
+        ),
+        'parties': parties
     }
 
+def generate_coligation_data(
+    coligations: list,
+    df_c: DataFrame,
+    df_p: DataFrame,
+    state_uuid: str,
+    coeciente_eleitoral: int,
+    year_uuid=str
+):
+    return [
+        factory_coligation(
+            coligation=col,
+            df_c=df_c,
+            df_p=df_p,
+            state_uuid=state_uuid,
+            coeciente_eleitoral=coeciente_eleitoral,
+            year_uuid=year_uuid
+        )
+        for col in coligations
+    ]
 
 def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: int, year_uuid: str):
     logging.info(f'Analizando o estado {state}')
@@ -135,11 +264,21 @@ def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: i
     logging.info(f'Foram encontrados {len(candidates_by_state)} candidatos em {len(parties_by_state)} partidos')
 
     cadeiras = len(candidates_by_state[candidates_by_state['descricao_totalizacao_turno'].isin(constants.ELECT_CONDITIONS)])
-    votos_nominais = int(sum(candidates_by_state['total_votos'])) + int(sum(parties_by_state['total_legenda']))
+    votos_nominais = int(sum(candidates_by_state['total_votos']))
+    legend_votes = int(sum(parties_by_state['total_legenda']))
 
-    coeciente_eleitoral = int(votos_nominais / cadeiras)
+    coeciente_eleitoral = int((votos_nominais + legend_votes) / cadeiras)
 
     state_uuid = uuid.uuid4()
+
+    coligations = generate_coligation_data(
+        coligations=helpers.get_legend_composition(parties_by_state),
+        df_c=candidates_by_state,
+        df_p=parties_by_state,
+        state_uuid=state_uuid,
+        coeciente_eleitoral=coeciente_eleitoral,
+        year_uuid=year_uuid
+    )
 
     return {
         'uuid': str(state_uuid),
@@ -147,39 +286,40 @@ def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: i
         'name': normalize_nome(nome=candidates_by_state['descricao_ue'].iloc[0]),
         'sigla': state,
         'year': int(ano),
-        'votes': votos_nominais,
+        'nominal_votes': votos_nominais,
+        'legend_votes': legend_votes,
         'chars': cadeiras,
         'election_quotient': coeciente_eleitoral,
-        'coligacoes': [
-            generate_coligation_data(
-                coligation=col,
-                df_c=candidates_by_state,
-                df_p=parties_by_state,
-                state_uuid=state_uuid,
-                coeciente_eleitoral=coeciente_eleitoral
-            )
-            for col in helpers.get_legend_composition(parties_by_state)
-        ]
+        'pulling_qty': sum(
+            map(lambda coligation: coligation.get('pulling_qty', 0), coligations)
+        ),
+        'coligations': coligations
     }
 
 
 def generate_ano_data(ano: int, df_c: DataFrame, df_p: DataFrame, res_json: list):
     year_uuid = uuid.uuid4()
 
+    states = [
+        generate_date_for_state(
+            state=state,
+            df_c=df_c[df_c['ano_eleicao'] == ano],
+            df_p=df_p[df_p['ano_eleicao'] == ano],
+            ano=ano,
+            year_uuid=year_uuid
+        )
+        for state in helpers.get_states(df=df_c)
+    ]
+
     res_json.append({
         'year': ano,
         'uuid': str(year_uuid),
         'is_federal': ano in constants.FEDERAL_ELECTIONS,
-        'estados': [
-            generate_date_for_state(
-                state=state,
-                df_c=df_c[df_c['ano_eleicao'] == ano],
-                df_p=df_p[df_p['ano_eleicao'] == ano],
-                ano=ano,
-                year_uuid=year_uuid
-            )
-            for state in helpers.get_states(df=df_c)
-        ]
+        'pulling_qty': helpers.get_sum_prop(states, 'pulling_qty'),
+        'legend_votes': helpers.get_sum_prop(states, 'legend_votes'),
+        'nominal_votes': helpers.get_sum_prop(states, 'nominal_votes'),
+        'chars': helpers.get_sum_prop(states, 'chars'),
+        'states': states
     })
 
 def main():

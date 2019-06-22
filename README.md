@@ -52,7 +52,7 @@ O arquivo resultante compactado estará na pasta `data/output`. Extraia o conte�
 
 ### Dados eleitorais por partido
 
-Após a geração de dados acima, será necessário termos os dados consolidados por partido. Para tanto, criou-se um fork do projeto de Turicas, para a extração os dados por partido do TSE. (Pull request em breve...)
+Após a geração de dados acima, será necessário termos os dados consolidados por partido. Para tanto, criou-se um [fork](https://github.com/emanuelgsouza/eleicoes-brasil) do projeto de Turicas, para a extração os dados por partido do TSE. (Pull request em breve...)
 
 Para tanto, siga as mesmas instruções do repositório do turicas, mas com a linha de comando de extração diferente, como a seguir:
 

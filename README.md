@@ -89,7 +89,7 @@ Para fazer o split do arquivo acima em cada estado, use o comando:
 
 ```sh
 # não esqueça do ambiente virtual
-python parser-to-json.py
+python generate-state-jsons.py
 ```
 
 Ele vai gerar a seguinte estrutura em `data/output`:
@@ -102,6 +102,23 @@ elections/
     - rj.json
     ...
 ```
+
+Também é possível gerar arquivos para cada uma das entidades do projeto, a saber:
+
+* Eleição
+* Estado
+* Coligação
+* Partido
+* Candidato
+
+Para tanto, é necessário executar o comando:
+
+```sh
+# não esqueça do ambiente virtual
+python generate-entities.py
+```
+
+Ele terá como output a criação de uma pasta em `data/output/entities`, com os JSONs para as respectivas entidades.
 
 ## Licença
 

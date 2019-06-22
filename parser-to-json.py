@@ -58,9 +58,9 @@ def main():
                 logging.info('Diretorio não existe, criando...')
                 os.makedirs(_path_year)
             
-            elections_to_save.append(omit(obj=election, _key='estados'))
+            elections_to_save.append(omit(obj=election, _key='states'))
             
-            states = election['estados']
+            states = election['states']
 
             for state in states:
                 sigla = str(state['sigla']).lower()

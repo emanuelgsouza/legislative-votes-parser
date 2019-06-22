@@ -35,21 +35,73 @@ pip install -r requirements.txt
 deactivate
 ```
 
-## Rodando localmente o projeto
+## Dependências
+
+### Dados eleitorais por candidato
 
 Antes de mais nada, é necessário um arquivo gerado pelo repositório do [turicas - Álvaro Justen](https://github.com/turicas). Ele tem um repositório massa, que é o [eleicoes-brasil](https://github.com/turicas/eleicoes-brasil). Através deste repositório, teremos acesso aos dados do TSE de maneira mais padronizada, e em CSV prontos para análise.
 
-O arquivo de interesse, é o gerado pela linha de comando `python tse.py votacao-zona --years=2018`. O dataset será gerado na pasta `data/output`. Copie-o para a pasta `data/input` neste repositório.
-
-Um outro arquivo necessário a esse projeto, foi gerado pelo notebook que se encontra em `notebooks/deputados-eleitos.ipynb`. Tal CSV será gerado por scrapping da [página da Câmara Legislativa Nacional](https://www.camara.leg.br/internet/agencia/infograficos-html5/DeputadosEleitos/index.html).
-
-Tendo as dependencias já instaladas e os CSVs acima gerados e constando na pasta `data/input`, basta rodar o parser para JSON:
+Execute a extração com:
 
 ```sh
+# não esqueça de estar em um ambiente virtual com virtualenv e já tenha instalado as dependências
+python tse.py votacao-zona --years=2018
+```
+
+O arquivo resultante compactado estará na pasta `data/output`. Extraia o conteúdo dele em `data/input` neste repositório.
+
+### Dados eleitorais por partido
+
+Após a geração de dados acima, será necessário termos os dados consolidados por partido. Para tanto, criou-se um fork do projeto de Turicas, para a extração os dados por partido do TSE. (Pull request em breve...)
+
+Para tanto, siga as mesmas instruções do repositório do turicas, mas com a linha de comando de extração diferente, como a seguir:
+
+```sh
+# não esqueça de estar em um ambiente virtual com virtualenv e já tenha instalado as dependências
+python tse.py votacao-partido-zona --years=2018
+```
+
+### Lista de deputados eleitos
+
+A lista de deputados eleitos, por Estado, você encontra na [página da Câmara Legislativa Nacional](https://www.camara.leg.br/internet/agencia/infograficos-html5/DeputadosEleitos/index.html). Não será necessário extrair esses dados, pois isso já foi feito no notebook `notebooks/deputados-eleitos.ipynb`, e colocado na pasta `data/output/deputados_eleitos.csv`.
+
+## Rodando localmente o projeto
+
+Tendo as dependencias já instaladas e os CSVs acima gerados e constando na pasta `data/input`, será necessário extrair consolidar os dados dos CSVs, com o comando:
+
+```sh
+# não esqueça do ambiente virtual
+python main.py
+```
+
+**Atenção**: em minha máquina, com 12GB de RAM e um Intell i5, o script acima consumiu toda a memória para fazer a extração, pois o Pandas, por padrão, traz todos os dados para a memória e um dos CSVs do TSE possui cerca de 2.8 GB de tamanho. Atenção a execução desse script.
+
+Tendo finalizado a consolidação, para transformar os dados para JSON, execute o comando:
+
+```sh
+# não esqueça do ambiente virtual
+python generate.py
+```
+
+O comando acima irá gerar um arquivo `data.json` em `data/output`. Este arquivo já trará os dados consolidados por eleição.
+
+Para fazer o split do arquivo acima em cada estado, use o comando:
+
+```sh
+# não esqueça do ambiente virtual
 python parser-to-json.py
 ```
 
-Rodando o código acima, perceba que aparecerá um arquivo em `data/output` com os JSONs já parseados e devidamente trabalhados
+Ele vai gerar a seguinte estrutura em `data/output`:
+
+```sh
+elections/
+  - elections.json # arquivo com o dado da eleição
+  - 2018/ # para cada estado, um JSON com os dados da eleição
+    - ac.json
+    - rj.json
+    ...
+```
 
 ## Licença
 

@@ -2,7 +2,7 @@ import logging
 import os
 import pandas as pd
 import constants
-from parser import generate_party_data, generate_candidate_data
+import parser
 from helpers import save_data
 
 """
@@ -16,7 +16,7 @@ Etapas
 """
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='[%(module)s-l.%(lineno)s]%(asctime)s: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
@@ -31,7 +31,7 @@ def main():
         logging.info('Arquivo existe')
     else:
         logging.info('Arquivo não existe')
-        data = pd.DataFrame(generate_party_data())
+        data = pd.DataFrame(parser.generate_party_data())
         logging.info('Salvando dados')
         save_data(df=data, filepath=constants.PARTIDO_FILE_PATH)
     
@@ -41,7 +41,7 @@ def main():
         logging.info('Arquivo existe')
     else:
         logging.info('Arquivo não existe')
-        data = pd.DataFrame(generate_candidate_data())
+        data = pd.DataFrame(parser.generate_candidate_data())
         logging.info('Salvando dados')
         save_data(df=data, filepath=constants.CANDIDATO_FILE_PATH)
 

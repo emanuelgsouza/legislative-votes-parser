@@ -197,6 +197,7 @@ def main():
         df_p = pd.read_csv(constants.PARTIDO_FILE_PATH)
     
     if not os.path.exists(constants.CANDIDATO_FILE_PATH):
+        df_p = None
         logging.info('Arquivo de candidatos não existe')
         return None
     else:

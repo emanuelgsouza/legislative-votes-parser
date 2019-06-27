@@ -19,8 +19,8 @@ entities = [
 	'elections',
 	'states',
 	'coligations'
-	'parties',
-	'delegates'
+	'parties'
+	'candidates'
 ]
 
 

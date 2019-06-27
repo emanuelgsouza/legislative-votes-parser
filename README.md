@@ -129,12 +129,21 @@ python parser-data-to-sql.py
 
 ## Fazendo o upload para o Firestore
 
-Também é possível fazer o upload das entidades geradas pelo script `generate-entity.py` para o Firestore do Firebase. Antes de executar o comando abaixo, certifique-se de ter um arquivo firebase.json na raiz desse repositório. Este arquivo será gerado pelo Firebase quando solicitado para gerar as permissões de Firebase Admin SDK. Após isso, é só executar o comando abaixo:
+Antes de mais nada, é necessário ter o pacote firebase-admin instalado, para tanto, execute:
+
+```sh
+# não esqueça do ambiente virtual
+pip install firebase-admin
+```
+
+Para fazer o upload das entidades geradas pelo script `generate-entity.py` para o Firestore do Firebase, certifique-se de ter um arquivo firebase.json na raiz desse repositório. Este arquivo será gerado pelo Firebase quando solicitado para gerar as permissões de Firebase Admin SDK. Após isso, é só executar o comando abaixo:
 
 ```sh
 # não esqueça do ambiente virtual
 python upload-firebase.py
 ```
+
+Ele vai iterar sobre cada uma das entidades e salvando no Firestore, com cada entidade sendo uma *collection*.
 
 ## Licença
 

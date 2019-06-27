@@ -121,5 +121,9 @@ dmypy.json
 /data/**/*.csv
 /data/**/*.json
 
+# ignore virtualenv files
 bin/
 include/
+
+# ignore firebase data
+/firebase.json

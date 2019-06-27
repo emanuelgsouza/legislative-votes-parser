@@ -127,6 +127,15 @@ Por fim, ainda é possível salvar os dados de `data.json` para um banco de dado
 python parser-data-to-sql.py
 ```
 
+## Fazendo o upload para o Firestore
+
+Também é possível fazer o upload das entidades geradas pelo script `generate-entity.py` para o Firestore do Firebase. Antes de executar o comando abaixo, certifique-se de ter um arquivo firebase.json na raiz desse repositório. Este arquivo será gerado pelo Firebase quando solicitado para gerar as permissões de Firebase Admin SDK. Após isso, é só executar o comando abaixo:
+
+```sh
+# não esqueça do ambiente virtual
+python upload-firebase.py
+```
+
 ## Licença
 
 Este código está licenciado sobre a licença [MIT](./LICENSE).

@@ -8,6 +8,8 @@ OUTPUT_PATH = 'data/output'
 PARTIDO_CSV = 'votos_consolidados_por_partido'
 CANDIDATO_CSV = 'votos_consolidados_por_deputado'
 
+FIREBASE_ADMIN_CREDENTIALS = './firebase.json'
+
 PARTIDO_FILE_PATH = f'{OUTPUT_PATH}/{PARTIDO_CSV}{FORMAT_FILE}'
 CANDIDATO_FILE_PATH = f'{OUTPUT_PATH}/{CANDIDATO_CSV}{FORMAT_FILE}'
 JSON_OUTPUT_PATH = f'{OUTPUT_PATH}/data.json'

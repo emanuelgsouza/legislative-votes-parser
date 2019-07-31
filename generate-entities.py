@@ -70,6 +70,7 @@ def main():
         coligations = []
         parties = []
         candidates = []
+        candidates_not_pulling = []
 
         for election in data:
             elections += [helpers.omit(election, 'states')]
@@ -85,6 +86,9 @@ def main():
 
                         for candidate in party.get('candidates', []):
                             candidates += [candidate]
+
+                            if not candidate['is_pulling']:
+                                candidates_not_pulling += [candidate]
         
         logging.info('Salvando dados para a entidade eleição')
         check_exists_and_save(obj=elections, path=get_entity_path(entity='elections'))
@@ -100,6 +104,9 @@ def main():
     
         logging.info('Salvando dados para a entidade candidato')
         check_exists_and_save(obj=candidates, path=get_entity_path(entity='candidates'))
+
+        logging.info('Salvando dados com a listagem de candidatos que não foram puxados')
+        check_exists_and_save(obj=candidates_not_pulling, path=get_entity_path(entity='candidates_not_pulling'))
 
 if __name__ == "__main__":
     main()

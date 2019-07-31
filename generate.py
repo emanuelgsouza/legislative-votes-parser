@@ -63,6 +63,7 @@ def factory_candidate(
     year_uuid=str
 ):
     status = candidate['descricao_totalizacao_turno']
+    votes = int(candidate['total_votos'])
 
     return {
         'uuid': str(str(uuid.uuid4())),
@@ -73,11 +74,11 @@ def factory_candidate(
         'name': normalize_nome(nome=candidate['nome']),
         'urne_name': normalize_nome(nome=candidate['nome_urna']),
         'number': int(candidate['numero_urna']),
-        'votes': int(candidate['total_votos']),
+        'votes': votes,
         'sigla_party': candidate['sigla_partido'],
         'state_sigla': candidate['sigla_uf'],
         'year': int(candidate['ano_eleicao']),
-        'is_pulling': status == 'ELEITO POR QP',
+        'is_pulling': votes <= coeciente_eleitoral,
         'status': status
     }
 

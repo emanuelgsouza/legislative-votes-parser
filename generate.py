@@ -144,7 +144,7 @@ def factory_party(
             'votes': 0,
             'elect_qty': 0,
             'suplent_qty': 0,
-            'pulling_qty': 0,
+            'not_pulling_qty': 0,
             'candidates': 0,
             'legend_votes': total_legenda,
             'candidates': []
@@ -163,7 +163,7 @@ def factory_party(
         'votes': int(sum(candidates['votes'])),
         'elect_qty': len(candidates[candidates['status'].isin(constants.ELECT_CONDITIONS)]),
         'suplent_qty': len(candidates[candidates['status'].isin(constants.SUPLENT_CONDITIONS)]),
-        'pulling_qty': len(candidates[candidates['is_pulling']]),
+        'not_pulling_qty': len(candidates[~candidates['is_pulling']]),
         'candidates': len(candidates),
         'legend_votes': total_legenda,
         'candidates': list(candidates.to_dict(orient='index').values())
@@ -230,8 +230,8 @@ def factory_coligation(
         'elect_qty': len(df_c[df_c['descricao_totalizacao_turno'].isin(constants.ELECT_CONDITIONS)]),
         'suplent_qty': len(df_c[df_c['descricao_totalizacao_turno'].isin(constants.SUPLENT_CONDITIONS)]),
         'candidates': len(df_c),
-        'pulling_qty': sum(
-            map(lambda x: int(x.get('pulling_qty', 0)), parties)
+        'not_pulling_qty': sum(
+            map(lambda x: int(x.get('not_pulling_qty', 0)), parties)
         ),
         'parties': parties
     }
@@ -291,8 +291,8 @@ def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: i
         'legend_votes': legend_votes,
         'chars': cadeiras,
         'election_quotient': coeciente_eleitoral,
-        'pulling_qty': sum(
-            map(lambda coligation: coligation.get('pulling_qty', 0), coligations)
+        'not_pulling_qty': sum(
+            map(lambda coligation: coligation.get('not_pulling_qty', 0), coligations)
         ),
         'coligations': coligations
     }
@@ -316,7 +316,7 @@ def generate_ano_data(ano: int, df_c: DataFrame, df_p: DataFrame, res_json: list
         'year': ano,
         'uuid': str(year_uuid),
         'is_federal': ano in constants.FEDERAL_ELECTIONS,
-        'pulling_qty': helpers.get_sum_prop(states, 'pulling_qty'),
+        'not_pulling_qty': helpers.get_sum_prop(states, 'not_pulling_qty'),
         'legend_votes': helpers.get_sum_prop(states, 'legend_votes'),
         'nominal_votes': helpers.get_sum_prop(states, 'nominal_votes'),
         'chars': helpers.get_sum_prop(states, 'chars'),

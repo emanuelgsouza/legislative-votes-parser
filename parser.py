@@ -76,7 +76,7 @@ def generate_party_data():
     processed = []
 
     for state in STATES:
-        dfl = df[df['sigla_uf'] == state]
+        dfl = df[(df['sigla_uf'] == state) & (df['codigo_cargo'] == 6)]
         logging.info(f'Processando dados para o {state}')
 
         partidos_grouped_by_vote = dfl[['nome_partido', 'total_votos']].groupby(by='nome_partido').sum()
@@ -113,7 +113,7 @@ def generate_party_data():
 def generate_candidate_data():
     df = pd.read_csv(f'{INPUT_PATH}/{CANDIDATO_MUNZONA}{FORMAT_FILE}')
 
-    candidates_grouped_by_vote = df[['nome_urna', 'total_votos']].groupby(by='nome_urna').sum()
+    candidates_grouped_by_vote = df[['numero_sequencial', 'total_votos']].groupby(by='numero_sequencial').sum()
 
     processed = []
 
@@ -147,7 +147,7 @@ def generate_candidate_data():
                 descricao_totalizacao_turno=row.descricao_totalizacao_turno,
                 descricao_detalhe_situacao_candidatura=row.descricao_detalhe_situacao_candidatura,
                 descricao_situacao_candidatura=row.descricao_situacao_candidatura,
-                total_votos=candidates_grouped_by_vote.loc[row.nome_urna].values.item()
+                total_votos=candidates_grouped_by_vote.loc[row.numero_sequencial].values.item()
             )
 
         processed.append(list(items.values()))

@@ -87,7 +87,7 @@ def main():
                         for candidate in party.get('candidates', []):
                             candidates += [candidate]
 
-                            if not candidate['is_pulling']:
+                            if candidate['not_is_pulling']:
                                 candidates_not_pulling += [candidate]
         
         logging.info('Salvando dados para a entidade eleição')

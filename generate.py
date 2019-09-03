@@ -78,7 +78,7 @@ def factory_candidate(
         'sigla_party': candidate['sigla_partido'],
         'state_sigla': candidate['sigla_uf'],
         'year': int(candidate['ano_eleicao']),
-        'is_pulling': votes <= coeciente_eleitoral,
+        'not_is_pulling': votes >= coeciente_eleitoral,
         'status': status
     }
 
@@ -145,7 +145,6 @@ def factory_party(
             'elect_qty': 0,
             'suplent_qty': 0,
             'not_pulling_qty': 0,
-            'candidates': 0,
             'legend_votes': total_legenda,
             'candidates': []
         }
@@ -163,7 +162,7 @@ def factory_party(
         'votes': int(sum(candidates['votes'])),
         'elect_qty': len(candidates[candidates['status'].isin(constants.ELECT_CONDITIONS)]),
         'suplent_qty': len(candidates[candidates['status'].isin(constants.SUPLENT_CONDITIONS)]),
-        'not_pulling_qty': len(candidates[~candidates['is_pulling']]),
+        'not_pulling_qty': len(candidates[candidates['not_is_pulling']]),
         'candidates': len(candidates),
         'legend_votes': total_legenda,
         'candidates': list(candidates.to_dict(orient='index').values())
@@ -265,7 +264,7 @@ def generate_date_for_state(state: str, df_c: DataFrame, df_p: DataFrame, ano: i
     logging.info(f'Foram encontrados {len(candidates_by_state)} candidatos em {len(parties_by_state)} partidos')
 
     cadeiras = len(candidates_by_state[candidates_by_state['descricao_totalizacao_turno'].isin(constants.ELECT_CONDITIONS)])
-    votos_nominais = int(sum(candidates_by_state['total_votos']))
+    votos_nominais = int(sum(parties_by_state['total_votos']))
     legend_votes = int(sum(parties_by_state['total_legenda']))
 
     coeciente_eleitoral = int((votos_nominais + legend_votes) / cadeiras)

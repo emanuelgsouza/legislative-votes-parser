@@ -125,5 +125,9 @@ dmypy.json
 bin/
 include/
 
+# ignore jupyter files
+share/
+etc/
+
 # ignore firebase data
 /firebase.json
